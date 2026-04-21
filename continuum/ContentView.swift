@@ -8,12 +8,25 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var offset: CGSize = .zero
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            SetCard(exerciseName: "Dumbbell RDLs", weight: 140, reps: 10)
+                .offset(offset)
+                .gesture(
+                    DragGesture()
+                        .onChanged({ value in
+                            offset = value.translation
+                        })
+                        .onEnded({ value in
+                            if value.translation.height < -100 {
+                                print("Set Completed!")
+                            } else {
+                                offset = .zero
+                            }
+                        })
+                )
         }
         .padding()
     }
