@@ -8,25 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var offset: CGSize = .zero
+    @State private var sets = [
+        WorkoutSet(exerciseName: "Dumbbell RDLs", weight: 140, reps: 10),
+        WorkoutSet(exerciseName: "Dumbbell RDLs", weight: 140, reps: 10),
+        WorkoutSet(exerciseName: "Dumbbell RDLs", weight: 140, reps: 10),
+    ]
     
     var body: some View {
-        VStack {
-            SetCard(exerciseName: "Dumbbell RDLs", weight: 140, reps: 10)
-                .offset(offset)
-                .gesture(
-                    DragGesture()
-                        .onChanged({ value in
-                            offset = value.translation
-                        })
-                        .onEnded({ value in
-                            if value.translation.height < -100 {
-                                print("Set Completed!")
-                            } else {
-                                offset = .zero
-                            }
-                        })
-                )
+        ZStack {
+            Color.gray.opacity(0.15)
+                .ignoresSafeArea()
+            ForEach(Array(sets.enumerated()), id: \.element.id) { index, set in
+                SetCard(exerciseName: set.exerciseName, weight: set.weight, reps: set.reps)
+                    .offset(x: CGFloat(index) * -8, y: CGFloat(index) * -8)
+            }
         }
         .padding()
     }

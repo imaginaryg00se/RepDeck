@@ -12,6 +12,8 @@ struct SetCard: View {
     let weight: Int
     let reps: Int
     
+    @State private var offset: CGSize = .zero
+    
     var body: some View {
         VStack(spacing: 12) {
             Text(exerciseName)
@@ -29,6 +31,20 @@ struct SetCard: View {
         .background(Color.white)
         .cornerRadius(20)
         .shadow(radius: 8)
+        .offset(offset)
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    offset = value.translation
+                }
+                .onEnded { value in
+                    if value.translation.height < -100 {
+                        print("Set completed!")
+                    } else {
+                        offset = .zero
+                    }
+                }
+        )
     }
 }
 
