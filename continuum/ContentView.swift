@@ -19,8 +19,8 @@ struct ContentView: View {
             Color.gray.opacity(0.15)
                 .ignoresSafeArea()
             ForEach(Array(sets.enumerated()), id: \.element.id) { index, set in
-                SetCard(exerciseName: set.exerciseName, weight: set.weight, reps: set.reps)
-                    .offset(x: CGFloat(index) * -8, y: CGFloat(index) * -8)
+                SetCard(exerciseName: set.exerciseName, weight: set.weight, reps: set.reps, onCompleted: {sets.removeLast()})
+                    .offset(x: 0, y: CGFloat(index) * -8)
             }
         }
         .padding()

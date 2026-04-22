@@ -11,6 +11,7 @@ struct SetCard: View {
     let exerciseName : String
     let weight: Int
     let reps: Int
+    let onCompleted: () -> Void
     
     @State private var offset: CGSize = .zero
     
@@ -39,7 +40,7 @@ struct SetCard: View {
                 }
                 .onEnded { value in
                     if value.translation.height < -100 {
-                        print("Set completed!")
+                        onCompleted()
                     } else {
                         offset = .zero
                     }
