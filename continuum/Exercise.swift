@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct Exercise: Identifiable {
+    let id = UUID()
+    let name: String
+    var sets: [WorkoutSet]
+}

@@ -9,7 +9,6 @@ import Foundation
 
 struct WorkoutSet: Identifiable {
     let id = UUID()
-    let exerciseName: String
     let weight: Int
     let reps: Int
 }
