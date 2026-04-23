@@ -35,21 +35,32 @@ struct ContentView: View {
             WorkoutSet(weight: 15, reps: 15),
         ]),
     ]
+    @State private var currentPage = 0
     
     var body: some View {
-        TabView {
+        TabView (selection: $currentPage){
             ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
                 ZStack {
                     Color.gray.opacity(0.15)
                         .ignoresSafeArea()
+                    VStack {
+                        ProgressView(value: Double(exercise.totalSets - exercise.sets.count),
+                            total: Double(exercise.totalSets))
+                            .padding(.horizontal)
+                        Spacer()
+                    }
                     ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
                         SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {exercises[exerciseIndex].sets.removeLast()})
                             .offset(x: 0, y: CGFloat(setIndex) * -8)
                     }
-                }
+                }.tag(exerciseIndex)
             }
         }
         .padding()
+        .onChange(of: currentPage) {
+            let feedback = UISelectionFeedbackGenerator()
+            feedback.selectionChanged()
+        }
         //.tabViewStyle(.page(indexDisplayMode: .always))
     }
 }
