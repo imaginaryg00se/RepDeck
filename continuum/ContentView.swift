@@ -47,6 +47,10 @@ struct ContentView: View {
                         ProgressView(value: Double(exercise.totalSets - exercise.sets.count),
                             total: Double(exercise.totalSets))
                             .padding(.horizontal)
+                            .tint(.green)
+                        Text("\(exercise.totalSets - exercise.sets.count)/\(exercise.totalSets)")
+                            .font(.caption)
+                            .foregroundColor(.gray)
                         Spacer()
                     }
                     ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
