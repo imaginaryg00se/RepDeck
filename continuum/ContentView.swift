@@ -53,8 +53,29 @@ struct ContentView: View {
                             .foregroundColor(.gray)
                         Spacer()
                     }
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.gray.opacity(0.15))
+                        .frame(width: 300, height: 200)
+                        .overlay(
+                            Image(systemName: "checkmark")
+                                .font(.largeTitle)
+                                .foregroundColor(.gray.opacity(0.4))
+                        )
                     ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
-                        SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {exercises[exerciseIndex].sets.removeLast()})
+                        SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {
+                                exercises[exerciseIndex].sets.removeLast()
+                                if exercises[exerciseIndex].sets.isEmpty {
+                                    let nextIndex = exercises.indices
+                                        .filter { $0 != exerciseIndex && !exercises[$0].sets.isEmpty }
+                                        .first(where: { $0 > exerciseIndex })
+                                        ?? exercises.indices.first(where: { !exercises[$0].sets.isEmpty })
+                                    if let next = nextIndex {
+                                        withAnimation {
+                                            currentPage = next
+                                        }
+                                    }
+                                }
+                            })
                             .offset(x: 0, y: CGFloat(setIndex) * -8)
                     }
                 }.tag(exerciseIndex)
