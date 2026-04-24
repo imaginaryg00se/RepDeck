@@ -63,7 +63,9 @@ struct ContentView: View {
                         )
                     ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
                         SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {
-                                exercises[exerciseIndex].sets.removeLast()
+                                _ = withAnimation(.easeOut(duration: 0.3)) {
+                                    exercises[exerciseIndex].sets.removeLast()
+                                } // We might care about the return value later when we implement "undo"
                                 if exercises[exerciseIndex].sets.isEmpty {
                                     let nextIndex = exercises.indices
                                         .filter { $0 != exerciseIndex && !exercises[$0].sets.isEmpty }
@@ -77,7 +79,7 @@ struct ContentView: View {
                                 }
                             })
                             .offset(x: 0, y: CGFloat(setIndex) * -8)
-                    }
+                    }.transition(.move(edge: .top).combined(with: .opacity))
                 }.tag(exerciseIndex)
             }
         }
