@@ -37,6 +37,9 @@ struct ExecutionView: View {
     ]
     @State private var currentPage = 0
     
+    @Binding var isWorkoutActive: Bool
+    @Binding var selectedTab: Int
+    
     var body: some View {
         TabView (selection: $currentPage){
             ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
@@ -75,6 +78,10 @@ struct ExecutionView: View {
                                     withAnimation {
                                         currentPage = next
                                     }
+                                } else {
+                                    // Workout complete
+                                    isWorkoutActive = false
+                                    selectedTab = 2
                                 }
                             }
                         })
@@ -92,5 +99,5 @@ struct ExecutionView: View {
     }
 }
 #Preview {
-    ExecutionView()
+    ExecutionView(isWorkoutActive: .constant(true), selectedTab: .constant(0))
 }
