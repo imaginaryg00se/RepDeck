@@ -8,9 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var isWorkoutActive = false
+    
     var body: some View {
             TabView {
-                HomeView()
+                HomeView(isWorkoutActive: $isWorkoutActive)
                     .tabItem {
                         Image(systemName: "house")
                         Text("Home")
@@ -25,6 +27,8 @@ struct ContentView: View {
                         Image(systemName: "clock")
                         Text("History")
                     }
+            }.fullScreenCover(isPresented: $isWorkoutActive) {
+                ExecutionView()
             }
         }
 }
