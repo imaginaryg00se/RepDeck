@@ -41,12 +41,26 @@ struct ExecutionView: View {
     @Binding var selectedTab: Int
     
     var body: some View {
+        
+        // Workout-level progress bar
+        let totalSets = exercises.reduce(0) { $0 + $1.totalSets }
+        let completedSets = exercises.reduce(0) { $0 + ($1.totalSets - $1.sets.count) }
+
+        ProgressView(value: Double(completedSets), total: Double(totalSets))
+            .tint(.blue)
+            .padding(.horizontal)
+        Text("\(completedSets)/\(totalSets)")
+            .font(.caption)
+            .foregroundColor(.gray)
+        Spacer()
+        
         TabView (selection: $currentPage){
             ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
                 ZStack {
                     Color.gray.opacity(0.15)
                         .ignoresSafeArea()
                     VStack {
+                        // Exercise-level progress bar
                         ProgressView(value: Double(exercise.totalSets - exercise.sets.count),
                                      total: Double(exercise.totalSets))
                         .padding(.horizontal)
