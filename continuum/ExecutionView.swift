@@ -49,16 +49,20 @@ struct ExecutionView: View {
         ProgressView(value: Double(completedSets), total: Double(totalSets))
             .tint(.blue)
             .padding(.horizontal)
+            .scaleEffect(x: 1, y: 2, anchor: .center)
+        
+        Text("Workout Progress")
+            .font(.headline)
         Text("\(completedSets)/\(totalSets)")
-            .font(.caption)
+            .font(.subheadline)
+            .fontWeight(.semibold)
             .foregroundColor(.gray)
-        Spacer()
         
         TabView (selection: $currentPage){
             ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
                 ZStack {
-                    Color.gray.opacity(0.15)
-                        .ignoresSafeArea()
+                    // Removing this allows app theme to default to device settings
+                    //Color.black.opacity(0.85).ignoresSafeArea()
                     VStack {
                         // Exercise-level progress bar
                         ProgressView(value: Double(exercise.totalSets - exercise.sets.count),
@@ -100,7 +104,9 @@ struct ExecutionView: View {
                             }
                         })
                         .offset(x: 0, y: CGFloat(setIndex) * -8)
-                    }.transition(.move(edge: .top).combined(with: .opacity))
+                        .transition(.move(edge: .top).combined(with: .opacity))
+                        .disabled(setIndex != exercise.sets.count - 1)
+                    }
                 }.tag(exerciseIndex)
             }
         }
@@ -109,7 +115,11 @@ struct ExecutionView: View {
             let feedback = UISelectionFeedbackGenerator()
             feedback.selectionChanged()
         }
+        // This changes navigation to dots rather than a slider
         //.tabViewStyle(.page(indexDisplayMode: .always))
+        Text("\(currentPage + 1) of \(exercises.count)")
+            .font(.subheadline)
+            .foregroundColor(.gray)
     }
 }
 #Preview {

@@ -39,7 +39,7 @@ struct SetCard: View {
                     offset = CGSize(width: 0, height: value.translation.height)
                 }
                 .onEnded { value in
-                    if value.translation.height < -200 {
+                    if value.translation.height < -175 {
                         let feedback = UIImpactFeedbackGenerator(style: .heavy)
                         feedback.impactOccurred()
                         onCompleted()
