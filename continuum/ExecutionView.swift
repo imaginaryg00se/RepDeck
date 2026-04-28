@@ -116,7 +116,21 @@ struct ExecutionView: View {
             feedback.selectionChanged()
         }
         // This changes navigation to dots rather than a slider
-        //.tabViewStyle(.page(indexDisplayMode: .always))
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        
+        // Custom index navigation row
+        HStack(spacing: 20) {
+            ForEach(exercises.indices, id: \.self) { index in
+                Circle()
+                    .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
+                    .frame(width: index == currentPage ? 20 : 10, height: index == currentPage ? 20 : 10)
+                    .onTapGesture {
+                        withAnimation {
+                            currentPage = index
+                        }
+                    }
+            }
+        }
         Text("\(currentPage + 1) of \(exercises.count)")
             .font(.subheadline)
             .foregroundColor(.gray)
@@ -124,4 +138,5 @@ struct ExecutionView: View {
 }
 #Preview {
     ExecutionView(isWorkoutActive: .constant(true), selectedTab: .constant(0))
+        .preferredColorScheme(.dark)
 }
