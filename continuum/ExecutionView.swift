@@ -41,115 +41,120 @@ struct ExecutionView: View {
     @Binding var selectedTab: Int
     
     var body: some View {
-        
-        // Workout-level progress bar
-        let totalSets = exercises.reduce(0) { $0 + $1.totalSets }
-        let completedSets = exercises.reduce(0) { $0 + ($1.totalSets - $1.sets.count) }
-
-        Text("Workout Progress")
-            .font(.headline)
-        
-        Text("\(completedSets)/\(totalSets)")
-            .font(.subheadline)
-            .fontWeight(.semibold)
-            .foregroundColor(.gray)
-        
-        HStack(spacing: 3) {
-            ForEach(0..<totalSets, id: \.self) { segmentIndex in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(segmentIndex < completedSets
-                          ? Color.blue
-                          : Color.gray.opacity(0.3))
-                    .frame(height: 6)
-            }
-        }
-        .padding(.horizontal)
-        
-        TabView (selection: $currentPage){
-            ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
-                ZStack {
-                    // Removing this allows app theme to default to device settings
-                    //Color.black.opacity(0.85).ignoresSafeArea()
-                    VStack {
-                        Spacer()
-                        // Exercise-level progress bar
-                        HStack(spacing: 3) {
-                            ForEach(0..<exercise.totalSets, id: \.self) { segmentIndex in
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(segmentIndex < (exercise.totalSets - exercise.sets.count)
-                                          ? Color.green
-                                          : Color.gray.opacity(0.3))
-                                    .frame(height: 6)
-                            }
-                        }
-                        .padding(.horizontal)
-                        Text("\(exercise.totalSets - exercise.sets.count)/\(exercise.totalSets)")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                    }
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.gray.opacity(0.15))
-                        .frame(width: 300, height: 200)
-                        .overlay(
-                            Image(systemName: "checkmark")
-                                .font(.largeTitle)
-                                .foregroundColor(.gray.opacity(0.4))
-                        )
-                    ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
-                        SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {
-                            _ = withAnimation(.easeOut(duration: 0.3)) {
-                                exercises[exerciseIndex].sets.removeLast()
-                            } // We might care about the return value later when we implement "undo"
-                            if exercises[exerciseIndex].sets.isEmpty {
-                                let nextIndex = exercises.indices
-                                    .filter { $0 != exerciseIndex && !exercises[$0].sets.isEmpty }
-                                    .first(where: { $0 > exerciseIndex })
-                                ?? exercises.indices.first(where: { !exercises[$0].sets.isEmpty })
-                                if let next = nextIndex {
-                                    withAnimation {
-                                        currentPage = next
-                                    }
-                                } else {
-                                    // Workout complete
-                                    isWorkoutActive = false
-                                    selectedTab = 2
+        VStack (spacing: 0) {
+            // Workout-level progress bar
+            VStack {
+                let totalSets = exercises.reduce(0) { $0 + $1.totalSets }
+                let completedSets = exercises.reduce(0) { $0 + ($1.totalSets - $1.sets.count) }
+                
+                Text("Workout Progress")
+                    .font(.headline)
+                
+                Text("\(completedSets)/\(totalSets)")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.gray)
+                
+                ProgressView(value: Double(completedSets), total: Double(totalSets))
+                    .tint(.blue)
+                    .padding(.horizontal)
+                    .scaleEffect(x: 1, y: 2, anchor: .center)
+            } // End of workout-level progress bar
+            
+            // Conceptual "Page"
+            VStack {
+                // Navigable tabs
+                TabView(selection: $currentPage) {
+                    // One Exercise per tab
+                    ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
+                        // Conceptual grouping of a page
+                        VStack {
+                            ZStack {
+                                // Ghost base card
+                                RoundedRectangle(cornerRadius: 20)
+                                    .fill(Color.gray.opacity(0.15))
+                                    .frame(width: 300, height: 200)
+                                    .overlay(
+                                        Image(systemName: "checkmark")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.gray.opacity(0.4))
+                                    )
+                                // Active stack of cards
+                                ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
+                                    SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {
+                                        _ = withAnimation(.easeOut(duration: 0.3)) {
+                                            exercises[exerciseIndex].sets.removeLast()
+                                        } // We might care about the return value later when we implement "undo"
+                                        if exercises[exerciseIndex].sets.isEmpty {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                                                let nextIndex = exercises.indices
+                                                    .filter { $0 != exerciseIndex && !exercises[$0].sets.isEmpty }
+                                                    .first(where: { $0 > exerciseIndex })
+                                                ?? exercises.indices.first(where: { !exercises[$0].sets.isEmpty })
+                                                if let next = nextIndex {
+                                                    withAnimation {
+                                                        currentPage = next
+                                                    }
+                                                } else {
+                                                    // Workout complete
+                                                    isWorkoutActive = false
+                                                    selectedTab = 2
+                                                }
+                                            }
+                                        }
+                                    })
+                                    .offset(x: 0, y: CGFloat(setIndex) * -8)
+                                    .transition(.move(edge: .top).combined(with: .opacity))
+                                    .disabled(setIndex != exercise.sets.count - 1)
                                 }
                             }
-                        })
-                        .offset(x: 0, y: CGFloat(setIndex) * -8)
-                        .transition(.move(edge: .top).combined(with: .opacity))
-                        .disabled(setIndex != exercise.sets.count - 1)
-                    }
-                }.tag(exerciseIndex)
-            }
-        }
-        .padding()
-        .onChange(of: currentPage) {
-            let feedback = UISelectionFeedbackGenerator()
-            feedback.selectionChanged()
-        }
-        // This changes navigation to dots rather than a slider
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        
-        // Custom index navigation row
-        HStack(spacing: 20) {
-            ForEach(exercises.indices, id: \.self) { index in
-                VStack(spacing: 4) {
-                    Circle()
-                        .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                        .frame(width: index == currentPage ? 20 : 15,
-                               height: index == currentPage ? 20 : 15)
-                    Text("\(index + 1)")
-                        .font(.system(size: 15))
-                        .foregroundColor(index == currentPage ? .white : .white.opacity(0.3))
-                }
-                .onTapGesture {
-                    withAnimation {
-                        currentPage = index
+                            // Exercise-level progress bar
+                            VStack {
+                                HStack(spacing: 3) {
+                                    ForEach(0..<exercise.totalSets, id: \.self) { segmentIndex in
+                                        RoundedRectangle(cornerRadius: 2)
+                                            .fill(segmentIndex < (exercise.totalSets - exercise.sets.count)
+                                                  ? Color.green
+                                                  : Color.gray.opacity(0.3))
+                                            .frame(height: 6)
+                                    }
+                                }
+                                .padding(.horizontal)
+                            }
+                        }.tag(exerciseIndex)
                     }
                 }
-            }
-        }
+                //.padding()
+                .onChange(of: currentPage) {
+                    let feedback = UISelectionFeedbackGenerator()
+                    feedback.selectionChanged()
+                }
+                // Remove default dot UI to replace with custom index navigation row
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                
+            } // End of conceptual "Page"
+            
+            // Custom index navigation row
+            HStack(spacing: 20) {
+                ForEach(exercises.indices, id: \.self) { index in
+                    VStack(spacing: 4) {
+                        Circle()
+                            .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
+                            .frame(width: index == currentPage ? 20 : 15,
+                                   height: index == currentPage ? 20 : 15)
+                        Text("\(index + 1)")
+                            .font(.system(size: 15))
+                            .foregroundColor(index == currentPage ? .white : .white.opacity(0.3))
+                    }
+                    .onTapGesture {
+                        withAnimation {
+                            currentPage = index
+                        }
+                    }
+                }
+            } // End of custom index navigation row
+            
+        } // End of top-level VStack
     }
 }
 #Preview {
