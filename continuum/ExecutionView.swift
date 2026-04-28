@@ -46,17 +46,24 @@ struct ExecutionView: View {
         let totalSets = exercises.reduce(0) { $0 + $1.totalSets }
         let completedSets = exercises.reduce(0) { $0 + ($1.totalSets - $1.sets.count) }
 
-        ProgressView(value: Double(completedSets), total: Double(totalSets))
-            .tint(.blue)
-            .padding(.horizontal)
-            .scaleEffect(x: 1, y: 2, anchor: .center)
-        
         Text("Workout Progress")
             .font(.headline)
+        
         Text("\(completedSets)/\(totalSets)")
             .font(.subheadline)
             .fontWeight(.semibold)
             .foregroundColor(.gray)
+        
+        HStack(spacing: 3) {
+            ForEach(0..<totalSets, id: \.self) { segmentIndex in
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(segmentIndex < completedSets
+                          ? Color.blue
+                          : Color.gray.opacity(0.3))
+                    .frame(height: 6)
+            }
+        }
+        .padding(.horizontal)
         
         TabView (selection: $currentPage){
             ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
@@ -64,15 +71,21 @@ struct ExecutionView: View {
                     // Removing this allows app theme to default to device settings
                     //Color.black.opacity(0.85).ignoresSafeArea()
                     VStack {
+                        Spacer()
                         // Exercise-level progress bar
-                        ProgressView(value: Double(exercise.totalSets - exercise.sets.count),
-                                     total: Double(exercise.totalSets))
+                        HStack(spacing: 3) {
+                            ForEach(0..<exercise.totalSets, id: \.self) { segmentIndex in
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(segmentIndex < (exercise.totalSets - exercise.sets.count)
+                                          ? Color.green
+                                          : Color.gray.opacity(0.3))
+                                    .frame(height: 6)
+                            }
+                        }
                         .padding(.horizontal)
-                        .tint(.green)
                         Text("\(exercise.totalSets - exercise.sets.count)/\(exercise.totalSets)")
                             .font(.caption)
                             .foregroundColor(.gray)
-                        Spacer()
                     }
                     RoundedRectangle(cornerRadius: 20)
                         .fill(Color.gray.opacity(0.15))
@@ -121,19 +134,22 @@ struct ExecutionView: View {
         // Custom index navigation row
         HStack(spacing: 20) {
             ForEach(exercises.indices, id: \.self) { index in
-                Circle()
-                    .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                    .frame(width: index == currentPage ? 20 : 10, height: index == currentPage ? 20 : 10)
-                    .onTapGesture {
-                        withAnimation {
-                            currentPage = index
-                        }
+                VStack(spacing: 4) {
+                    Circle()
+                        .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
+                        .frame(width: index == currentPage ? 20 : 15,
+                               height: index == currentPage ? 20 : 15)
+                    Text("\(index + 1)")
+                        .font(.system(size: 15))
+                        .foregroundColor(index == currentPage ? .white : .white.opacity(0.3))
+                }
+                .onTapGesture {
+                    withAnimation {
+                        currentPage = index
                     }
+                }
             }
         }
-        Text("\(currentPage + 1) of \(exercises.count)")
-            .font(.subheadline)
-            .foregroundColor(.gray)
     }
 }
 #Preview {
