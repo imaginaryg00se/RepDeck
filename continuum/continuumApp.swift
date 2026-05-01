@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 @main
 struct continuumApp: App {
@@ -13,5 +14,11 @@ struct continuumApp: App {
         WindowGroup {
             ContentView()
         }
+        .modelContainer(for: [
+            ExerciseTemplate.self,
+            Plan.self,
+            PlanDay.self,
+            ScheduledExercise.self
+        ])
     }
 }
