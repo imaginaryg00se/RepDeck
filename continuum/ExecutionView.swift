@@ -9,30 +9,30 @@ import SwiftUI
 
 struct ExecutionView: View {
     @State private var exercises = [
-        Exercise(name: "Barbell Squats", sets: [
-            WorkoutSet(weight: 285, reps: 8),
-            WorkoutSet(weight: 285, reps: 8),
-            WorkoutSet(weight: 285, reps: 8),
+        Exercise(name: "Weighted Pull-up", sets: [
+            WorkoutSet(weight: 25, reps: 10),
+            WorkoutSet(weight: 25, reps: 10),
+            WorkoutSet(weight: 25, reps: 10),
         ]),
-        Exercise(name: "Weighted Dips", sets: [
-            WorkoutSet(weight: 10, reps: 10),
-            WorkoutSet(weight: 10, reps: 10),
-            WorkoutSet(weight: 10, reps: 10),
+        Exercise(name: "Barbell Shoulder Press", sets: [
+            WorkoutSet(weight: 105, reps: 10),
+            WorkoutSet(weight: 105, reps: 10),
+            WorkoutSet(weight: 105, reps: 10),
         ]),
         Exercise(name: "Barbell Lateral Raise", sets: [
             WorkoutSet(weight: 15, reps: 20),
             WorkoutSet(weight: 15, reps: 20),
             WorkoutSet(weight: 15, reps: 20),
         ]),
-        Exercise(name: "Dumbbell RDLs", sets : [
-            WorkoutSet(weight: 190, reps: 10),
-            WorkoutSet(weight: 190, reps: 10),
-            WorkoutSet(weight: 190, reps: 10),
+        Exercise(name: "Cable Row", sets: [
+            WorkoutSet(weight: 140, reps: 10),
+            WorkoutSet(weight: 140, reps: 10),
+            WorkoutSet(weight: 140, reps: 10),
         ]),
-        Exercise(name: "Barbell Shoulder Press", sets: [
-            WorkoutSet(weight: 105, reps: 10),
-            WorkoutSet(weight: 105, reps: 10),
-            WorkoutSet(weight: 105, reps: 10),
+        Exercise(name: "Weighted Dip", sets : [
+            WorkoutSet(weight: 190, reps: 10),
+            WorkoutSet(weight: 190, reps: 10),
+            WorkoutSet(weight: 190, reps: 10),
         ]),
     ]
     @State private var currentPage = 0
