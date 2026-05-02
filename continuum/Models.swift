@@ -59,6 +59,11 @@ class PlanDay {
         // dayOfWeek follows Calendar convention: 1=Sunday, 2=Monday...
         return formatter.weekdaySymbols[dayOfWeek - 1]
     }
+    
+    var shortDayName: String {
+        let formatter = DateFormatter()
+        return formatter.shortWeekdaySymbols[dayOfWeek - 1]
+    }
 }
 
 @Model

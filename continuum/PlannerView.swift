@@ -6,10 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct PlannerView: View {
+    @Query var plans: [Plan]
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            // Update logic when more than one Plan exists
+            if let activePlan = plans.first {
+                PlanDayTabView(plan: activePlan)
+            } else {
+                Text("No program found")
+            }
+        }
     }
 }
 

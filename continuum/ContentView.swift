@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var isWorkoutActive = false
     @State private var selectedTab = 0
     
+    @Environment(\.modelContext) private var modelContext
+    
     var body: some View {
         TabView (selection: $selectedTab) {
                 HomeView(isWorkoutActive: $isWorkoutActive)
@@ -31,10 +33,14 @@ struct ContentView: View {
                         Text("History")
                     }
                     .tag(2)
-            }.fullScreenCover(isPresented: $isWorkoutActive) {
-                ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab)
-            }
         }
+        .fullScreenCover(isPresented: $isWorkoutActive) {
+            ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab)
+        }
+        .onAppear {
+            DataSeeder.seedIfNeeded(context: modelContext, force: true)
+        }
+    }
 }
 
 #Preview {
