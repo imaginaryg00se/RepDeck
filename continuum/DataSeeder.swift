@@ -14,6 +14,18 @@ struct DataSeeder {
         let existingTemplates = try? context.fetch(descriptor)
         guard existingTemplates?.isEmpty == true || force else { return }
         
+        // If forcing, delete existing data first
+        if force {
+            existingTemplates?.forEach { context.delete($0) }
+            
+            // Also delete existing plans
+            let planDescriptor = FetchDescriptor<Plan>()
+            let existingPlans = try? context.fetch(planDescriptor)
+            existingPlans?.forEach { context.delete($0) }
+            
+            try? context.save()
+        }
+        
         // Exercise library
         let exerciseTemplates = [
             // Squat pattern

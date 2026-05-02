@@ -51,7 +51,6 @@ struct PlanDayView: View {
         .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView(planDay: planDay)
         }
-        .navigationTitle(planDay.dayName)
     }
     
     func deleteExercises(at indexSet: IndexSet) {

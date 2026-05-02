@@ -38,7 +38,7 @@ struct ContentView: View {
             ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab)
         }
         .onAppear {
-            DataSeeder.seedIfNeeded(context: modelContext, force: true)
+            DataSeeder.seedIfNeeded(context: modelContext, force: false)
         }
     }
 }
