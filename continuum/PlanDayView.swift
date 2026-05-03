@@ -13,6 +13,7 @@ struct PlanDayView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showingExercisePicker = false
     
+    // Sort by sequential order
     var sortedExercises: [ScheduledExercise] {
         planDay.scheduledExercises.sorted { $0.orderIndex < $1.orderIndex }
     }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ExerciseRow: View {
     let exercise: ScheduledExercise
+    @State private var showingConfig = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -17,8 +18,21 @@ struct ExerciseRow: View {
             Text("\(exercise.workingSets) sets × \(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
                 .font(.caption)
                 .foregroundColor(.gray)
+            Text("\(exercise.workingSets) sets × \(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
+                .font(.caption)
+                .foregroundColor(.gray)
         }
         .padding(.vertical, 4)
+        .background(
+            Button { showingConfig = true } label: {
+                Color.clear
+            }
+        )
+        .sheet(isPresented: $showingConfig) {
+            ExerciseConfigView(exercise: exercise)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
     }
 }
 

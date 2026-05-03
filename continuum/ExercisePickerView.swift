@@ -49,9 +49,11 @@ struct ExercisePickerView: View {
         let orderIndex = planDay.scheduledExercises.count
         let newExercise = ScheduledExercise(
             orderIndex: orderIndex,
+            // Smart defaults
             workingSets: 3,
             targetReps: 10,
             targetWeight: 0,
+            
             exerciseTemplate: template
         )
         modelContext.insert(newExercise)
