@@ -56,7 +56,7 @@ struct ExecutionView: View {
             // Carousel
             TabView(selection: $currentPage) {
                 ForEach(Array(todayExercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
-                    VStack(spacing: 0) {
+                    VStack(spacing: 3) {
                         ZStack {
                             // Ghost base card
                             RoundedRectangle(cornerRadius: 20)

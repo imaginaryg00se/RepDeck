@@ -36,7 +36,7 @@ struct SetCard: View {
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    offset = CGSize(width: 0, height: value.translation.height)
+                    offset = CGSize(width: 0, height: min(value.translation.height, 0))
                 }
                 .onEnded { value in
                     if value.translation.height < -175 {
