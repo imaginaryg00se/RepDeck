@@ -54,5 +54,13 @@ struct SlideToStartView: View {
         }
         .frame(height: 60)
         .padding(.horizontal)
+        // Reset slider circle
+        .onChange(of: isWorkoutActive) {
+            if !isWorkoutActive {
+                withAnimation(.spring()) {
+                    offset = 0
+                }
+            }
+        }
     }
 }
