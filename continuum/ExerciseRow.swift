@@ -30,7 +30,7 @@ struct ExerciseRow: View {
         )
         .sheet(isPresented: $showingConfig) {
             ExerciseConfigView(exercise: exercise)
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.fraction(0.85), .large])
                 .presentationDragIndicator(.visible)
         }
     }

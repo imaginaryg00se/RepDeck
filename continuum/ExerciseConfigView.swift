@@ -13,6 +13,7 @@ struct ExerciseConfigView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
+    
     @State private var workingSets: Int
     @State private var targetReps: Int
     @State private var targetWeight: Int
@@ -35,9 +36,31 @@ struct ExerciseConfigView: View {
                 }
                 
                 Section("Targets") {
-                    Stepper("Sets: \(workingSets)", value: $workingSets, in: 1...10)
-                    Stepper("Reps: \(targetReps)", value: $targetReps, in: 1...30)
-                    Stepper("Weight: \(targetWeight) lbs", value: $targetWeight, in: 0...1000, step: 5)
+                    // All Steppers auto save
+                    Stepper("Sets: \(exercise.workingSets)", value: Binding(
+                        get: { exercise.workingSets },
+                        set: {
+                            exercise.workingSets = $0
+                            try? modelContext.save()
+                        }
+                    ), in: 1...10)
+                    
+                    Stepper("Reps: \(exercise.targetReps)", value: Binding(
+                        get: { exercise.targetReps },
+                        set: {
+                            exercise.targetReps = $0
+                            try? modelContext.save()
+                        }
+                    ), in: 1...30)
+                    
+                    Stepper("Weight: \(exercise.targetWeight)", value: Binding(
+                        get: { exercise.targetWeight },
+                        set: {
+                            exercise.targetWeight = $0
+                            try? modelContext.save()
+                        }
+                    ), in: 1...30, step: 5)
+                    
                 }
                 
                 Section("Notes") {
@@ -47,18 +70,6 @@ struct ExerciseConfigView: View {
             }
             .navigationTitle("Configure Exercise")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button { dismiss() } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
-                        saveChanges()
-                    }
-                }
-            }
         }
     }
     
