@@ -11,9 +11,13 @@ import SwiftData
 struct ExecutionView: View {
     @Binding var isWorkoutActive: Bool
     @Binding var selectedTab: Int
+    
     @Query var plans: [Plan]
+    
     @State private var completedSets: [UUID: Int] = [:]
     @State private var currentPage = 0
+    @State private var cardWidth: CGFloat = 300
+    
     @Environment(\.modelContext) private var modelContext
     
     var todayExercises: [ScheduledExercise] {
@@ -63,6 +67,14 @@ struct ExecutionView: View {
                                         .font(.largeTitle)
                                         .foregroundColor(.gray.opacity(0.4))
                                 )
+                                .background(
+                                    GeometryReader { geometry in
+                                        Color.clear
+                                            .onAppear {
+                                                cardWidth = geometry.size.width
+                                            }
+                                    }
+                                )
                             
                             // Active cards
                             let remaining = exercise.workingSets - (completedSets[exercise.id] ?? 0)
@@ -94,6 +106,7 @@ struct ExecutionView: View {
                         }
                         .padding(.horizontal)
                         .animation(.easeOut(duration: 0.3), value: completedSets[exercise.id])
+                        .frame(width: cardWidth)
                     }
                     .tag(exerciseIndex)
                 }
@@ -162,8 +175,4 @@ struct ExecutionView: View {
             }
         }
     }
-}
-#Preview {
-    ExecutionView(isWorkoutActive: .constant(true), selectedTab: .constant(0))
-        .preferredColorScheme(.dark)
 }
