@@ -56,7 +56,10 @@ struct ExercisePickerView: View {
             
             exerciseTemplate: template
         )
+        // Add to database
         modelContext.insert(newExercise)
+        
+        // Add newExercise to planDay
         planDay.scheduledExercises.append(newExercise)
         try? modelContext.save()
         dismiss()

@@ -57,6 +57,9 @@ struct PlanDayView: View {
     func deleteExercises(at indexSet: IndexSet) {
         for index in indexSet {
             let exercise = sortedExercises[index]
+            // Remove object
+            planDay.scheduledExercises.removeAll { $0.id == exercise.id }
+            // Remove from database
             modelContext.delete(exercise)
         }
         try? modelContext.save()

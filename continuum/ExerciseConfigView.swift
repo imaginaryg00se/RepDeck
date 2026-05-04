@@ -53,19 +53,30 @@ struct ExerciseConfigView: View {
                         }
                     ), in: 1...30)
                     
-                    Stepper("Weight: \(exercise.targetWeight)", value: Binding(
+                    Picker("Weight", selection: Binding(
                         get: { exercise.targetWeight },
                         set: {
                             exercise.targetWeight = $0
                             try? modelContext.save()
                         }
-                    ), in: 1...30, step: 5)
+                    )) {
+                        ForEach(Array(stride(from: 0, through: 1000, by: 5)), id: \.self) { weight in
+                            Text("\(weight) lbs").tag(weight)
+                        }
+                    }
+                    .pickerStyle(.wheel)
                     
                 }
                 
                 Section("Notes") {
-                    TextField("Optional notes", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
+                    TextField("Optional notes", text: Binding(
+                        get: { exercise.notes },
+                        set: {
+                            exercise.notes = $0
+                            try? modelContext.save()
+                        }
+                    ), axis: .vertical)
+                    .lineLimit(3...6)
                 }
             }
             .navigationTitle("Configure Exercise")
