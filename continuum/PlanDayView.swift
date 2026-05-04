@@ -51,6 +51,8 @@ struct PlanDayView: View {
         }
         .sheet(isPresented: $showingExercisePicker) {
             ExercisePickerView(planDay: planDay)
+                .presentationDetents([.fraction(0.85), .large])
+                .presentationDragIndicator(.visible)
         }
     }
     

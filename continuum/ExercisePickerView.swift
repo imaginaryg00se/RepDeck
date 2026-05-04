@@ -35,13 +35,6 @@ struct ExercisePickerView: View {
             .searchable(text: $searchText, prompt: "Search exercises")
             .navigationTitle("Add Exercise")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "chevron.left")
-                    }
-                }
-            }
         }
     }
     
