@@ -63,6 +63,9 @@ struct HomeView: View {
                         }
                     }
                 }
+                // Slide to start
+                SlideToStartView(isWorkoutActive: $isWorkoutActive)
+                    .padding(.bottom)
             }
         }
     }
