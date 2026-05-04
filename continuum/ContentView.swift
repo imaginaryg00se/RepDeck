@@ -10,6 +10,7 @@ import SwiftUI
 struct ContentView: View {
     @State private var isWorkoutActive = false
     @State private var selectedTab = 0
+    @State private var workoutJustCompleted = false
     
     @Environment(\.modelContext) private var modelContext
     
@@ -35,8 +36,10 @@ struct ContentView: View {
                     .tag(2)
         }
         .fullScreenCover(isPresented: $isWorkoutActive) {
-            ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab)
+            ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab, workoutJustCompleted: $workoutJustCompleted)
         }
+        .sheet(isPresented: $workoutJustCompleted) {
+                WorkoutSummaryView()
         .onAppear {
             DataSeeder.seedIfNeeded(context: modelContext, force: false)
         }

@@ -18,7 +18,9 @@ struct continuumApp: App {
             ExerciseTemplate.self,
             Plan.self,
             PlanDay.self,
-            ScheduledExercise.self
+            ScheduledExercise.self,
+            WorkoutLog.self,
+            ExerciseLog.self
         ])
     }
 }

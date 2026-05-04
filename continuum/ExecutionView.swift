@@ -11,6 +11,7 @@ import SwiftData
 struct ExecutionView: View {
     @Binding var isWorkoutActive: Bool
     @Binding var selectedTab: Int
+    @Binding var workoutJustCompleted = Bool
     
     @Query var plans: [Plan]
     
@@ -139,7 +140,7 @@ struct ExecutionView: View {
             .padding()
         }
     }
-    
+    // Helper function handling set completion behavior
     func completeSet(exercise: ScheduledExercise, exerciseIndex: Int) {
             withAnimation(.easeOut(duration: 0.3)) {
             completedSets[exercise.id, default: 0] += 1
@@ -150,6 +151,7 @@ struct ExecutionView: View {
         
         if isExhausted {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                // Once a stack is exhausted, move to next available stack
                 let nextIndex = todayExercises.indices
                     .filter { idx in
                         let ex = todayExercises[idx]
@@ -169,10 +171,37 @@ struct ExecutionView: View {
                     }
                 } else {
                     // Workout complete
+                    saveWorkoutLog()
                     isWorkoutActive = false
                     selectedTab = 2
+                    workoutJustCompleted = true
                 }
             }
         }
+    }
+    // Helper function hanlding record keeping
+    func saveWorkoutLog() {
+        let workoutLog = WorkoutLog(date: Date(), duration: 0)
+        modelContext.insert(workoutLog)
+        
+        // include ALL exercises, even if setsCompleted = 0
+        for exercise in todayExercises {
+            // find the number of completedSets for a given exercise
+            let setsCompleted = completedSets[exercise.id] ?? 0
+            
+            let exerciseLog = ExerciseLog(
+                exerciseName: exercise.exerciseTemplate?.displayName ?? "Unknown",
+                targetSets: exercise.workingSets,
+                setsCompleted: setsCompleted,
+                targetReps: exercise.targetReps,
+                targetWeight: exercise.targetWeight,
+                notes: exercise.notes
+            )
+            modelContext.insert(exerciseLog)
+            // Add exerciseLog to workoutLog
+            workoutLog.exerciseLogs.append(exerciseLog)
+        }
+        
+        try? modelContext.save()
     }
 }

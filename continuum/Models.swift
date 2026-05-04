@@ -86,3 +86,39 @@ class ScheduledExercise {
         self.exerciseTemplate = exerciseTemplate
     }
 }
+
+@Model
+class WorkoutLog {
+    var id: UUID
+    var date: Date
+    var duration: TimeInterval
+    @Relationship(deleteRule: .cascade) var exerciseLogs: [ExerciseLog]
+    
+    init(date: Date, duration: TimeInterval) {
+        self.id = UUID()
+        self.date = date
+        self.duration = duration
+        self.exerciseLogs = []
+    }
+}
+
+@Model
+class ExerciseLog {
+    var id: UUID
+    var exerciseName: String
+    var targetSets: Int         // intent — what was planned
+    var setsCompleted: Int      // actuals — what was done
+    var targetReps: Int
+    var targetWeight: Int
+    var notes: String
+    
+    init(exerciseName: String, targetSets: Int, setsCompleted: Int, targetReps: Int, targetWeight: Int, notes: String = "") {
+        self.id = UUID()
+        self.exerciseName = exerciseName
+        self.targetSets = targetSets
+        self.setsCompleted = setsCompleted
+        self.targetReps = targetReps
+        self.targetWeight = targetWeight
+        self.notes = notes
+    }
+}

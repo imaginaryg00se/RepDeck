@@ -67,7 +67,3 @@ struct PlanDayView: View {
         try? modelContext.save()
     }
 }
-
-#Preview {
-    //PlanDayView()
-}
