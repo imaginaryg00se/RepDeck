@@ -6,144 +6,114 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ExecutionView: View {
-    @State private var exercises = [
-        Exercise(name: "Weighted Pull-up", sets: [
-            WorkoutSet(weight: 25, reps: 10),
-            WorkoutSet(weight: 25, reps: 10),
-            WorkoutSet(weight: 25, reps: 10),
-        ]),
-        Exercise(name: "Barbell Shoulder Press", sets: [
-            WorkoutSet(weight: 105, reps: 10),
-            WorkoutSet(weight: 105, reps: 10),
-            WorkoutSet(weight: 105, reps: 10),
-        ]),
-        Exercise(name: "Barbell Lateral Raise", sets: [
-            WorkoutSet(weight: 15, reps: 20),
-            WorkoutSet(weight: 15, reps: 20),
-            WorkoutSet(weight: 15, reps: 20),
-        ]),
-        Exercise(name: "Cable Row", sets: [
-            WorkoutSet(weight: 140, reps: 10),
-            WorkoutSet(weight: 140, reps: 10),
-            WorkoutSet(weight: 140, reps: 10),
-        ]),
-        Exercise(name: "Weighted Dip", sets : [
-            WorkoutSet(weight: 190, reps: 10),
-            WorkoutSet(weight: 190, reps: 10),
-            WorkoutSet(weight: 190, reps: 10),
-        ]),
-    ]
-    @State private var currentPage = 0
-    
     @Binding var isWorkoutActive: Bool
     @Binding var selectedTab: Int
+    @Query var plans: [Plan]
+    @State private var completedSets: [UUID: Int] = [:]
+    @State private var currentPage = 0
+    @Environment(\.modelContext) private var modelContext
+    
+    var todayExercises: [ScheduledExercise] {
+        let today = Calendar.current.component(.weekday, from: Date())
+        return plans.first?.planDays
+            .first(where: { $0.dayOfWeek == today })?
+            .scheduledExercises
+            .sorted { $0.orderIndex < $1.orderIndex } ?? []
+    }
+    
+    var totalSets: Int {
+        todayExercises.reduce(0) { $0 + $1.workingSets }
+    }
+    
+    var totalCompletedSets: Int {
+        completedSets.values.reduce(0, +)
+    }
     
     var body: some View {
-        VStack (spacing: 0) {
+        VStack(spacing: 0) {
             // Workout-level progress bar
-            VStack {
-                let totalSets = exercises.reduce(0) { $0 + $1.totalSets }
-                let completedSets = exercises.reduce(0) { $0 + ($1.totalSets - $1.sets.count) }
-                
+            VStack(spacing: 4) {
                 Text("Workout Progress")
                     .font(.headline)
-                
-                Text("\(completedSets)/\(totalSets)")
+                Text("\(totalCompletedSets)/\(totalSets)")
                     .font(.subheadline)
                     .fontWeight(.semibold)
                     .foregroundColor(.gray)
-                
-                ProgressView(value: Double(completedSets), total: Double(totalSets))
+                ProgressView(value: Double(totalCompletedSets), total: Double(totalSets))
                     .tint(.blue)
                     .padding(.horizontal)
                     .scaleEffect(x: 1, y: 2, anchor: .center)
-            } // End of workout-level progress bar
+            }
+            .padding(.top)
             
-            // Conceptual "Page"
-            VStack {
-                // Navigable tabs
-                TabView(selection: $currentPage) {
-                    // One Exercise per tab
-                    ForEach(Array(exercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
-                        // Conceptual grouping of a page
-                        VStack {
-                            ZStack {
-                                // Ghost base card
-                                RoundedRectangle(cornerRadius: 20)
-                                    .fill(Color.gray.opacity(0.15))
-                                    .frame(width: 300, height: 200)
-                                    .overlay(
-                                        Image(systemName: "checkmark")
-                                            .font(.largeTitle)
-                                            .foregroundColor(.gray.opacity(0.4))
-                                    )
-                                // Active stack of cards
-                                ForEach(Array(exercise.sets.enumerated()), id: \.element.id) { setIndex, set in
-                                    SetCard(exerciseName: exercise.name, weight: set.weight, reps: set.reps, onCompleted: {
-                                        _ = withAnimation(.easeOut(duration: 0.3)) {
-                                            exercises[exerciseIndex].sets.removeLast()
-                                        } // We might care about the return value later when we implement "undo"
-                                        if exercises[exerciseIndex].sets.isEmpty {
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-                                                let nextIndex = exercises.indices
-                                                    .filter { $0 != exerciseIndex && !exercises[$0].sets.isEmpty }
-                                                    .first(where: { $0 > exerciseIndex })
-                                                ?? exercises.indices.first(where: { !exercises[$0].sets.isEmpty })
-                                                if let next = nextIndex {
-                                                    withAnimation {
-                                                        currentPage = next
-                                                    }
-                                                } else {
-                                                    // Workout complete
-                                                    isWorkoutActive = false
-                                                    selectedTab = 2
-                                                }
-                                            }
-                                        }
-                                    })
-                                    .offset(x: 0, y: CGFloat(setIndex) * -8)
-                                    .transition(.move(edge: .top).combined(with: .opacity))
-                                    .disabled(setIndex != exercise.sets.count - 1)
-                                }
-                            }
-                            // Exercise-level progress bar
-                            VStack {
-                                HStack(spacing: 3) {
-                                    ForEach(0..<exercise.totalSets, id: \.self) { segmentIndex in
-                                        RoundedRectangle(cornerRadius: 2)
-                                            .fill(segmentIndex < (exercise.totalSets - exercise.sets.count)
-                                                  ? Color.green
-                                                  : Color.gray.opacity(0.3))
-                                            .frame(height: 6)
+            // Carousel
+            TabView(selection: $currentPage) {
+                ForEach(Array(todayExercises.enumerated()), id: \.element.id) { exerciseIndex, exercise in
+                    VStack(spacing: 0) {
+                        ZStack {
+                            // Ghost base card
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(Color.gray.opacity(0.15))
+                                .frame(width: 300, height: 200)
+                                .overlay(
+                                    Image(systemName: "checkmark")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.gray.opacity(0.4))
+                                )
+                            
+                            // Active cards
+                            let remaining = exercise.workingSets - (completedSets[exercise.id] ?? 0)
+                            ForEach(0..<max(remaining, 0), id: \.self) { setIndex in
+                                SetCard(
+                                    exerciseName: exercise.exerciseTemplate?.displayName ?? "Unknown",
+                                    weight: exercise.targetWeight,
+                                    reps: exercise.targetReps,
+                                    onCompleted: {
+                                        completeSet(exercise: exercise, exerciseIndex: exerciseIndex)
                                     }
-                                }
-                                .padding(.horizontal)
+                                )
+                                .offset(x: 0, y: CGFloat(setIndex) * -8)
+                                .transition(.move(edge: .top).combined(with: .opacity))
+                                .disabled(setIndex != remaining - 1)
                             }
-                        }.tag(exerciseIndex)
+                            .animation(.easeOut(duration: 0.3), value: completedSets[exercise.id])
+                        }
+                        
+                        // Exercise-level segmented progress bar
+                        HStack(spacing: 3) {
+                            ForEach(0..<exercise.workingSets, id: \.self) { segmentIndex in
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(segmentIndex < (completedSets[exercise.id] ?? 0)
+                                          ? Color.green
+                                          : Color.gray.opacity(0.3))
+                                    .frame(height: 6)
+                            }
+                        }
+                        .padding(.horizontal)
+                        .animation(.easeOut(duration: 0.3), value: completedSets[exercise.id])
                     }
+                    .tag(exerciseIndex)
                 }
-                //.padding()
-                .onChange(of: currentPage) {
-                    let feedback = UISelectionFeedbackGenerator()
-                    feedback.selectionChanged()
-                }
-                // Remove default dot UI to replace with custom index navigation row
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                
-            } // End of conceptual "Page"
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .onChange(of: currentPage) {
+                let feedback = UISelectionFeedbackGenerator()
+                feedback.selectionChanged()
+            }
             
-            // Custom index navigation row
+            // Custom dot navigation
             HStack(spacing: 20) {
-                ForEach(exercises.indices, id: \.self) { index in
+                ForEach(todayExercises.indices, id: \.self) { index in
                     VStack(spacing: 4) {
                         Circle()
                             .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                            .frame(width: index == currentPage ? 20 : 15,
-                                   height: index == currentPage ? 20 : 15)
+                            .frame(width: index == currentPage ? 14 : 10,
+                                   height: index == currentPage ? 14 : 10)
                         Text("\(index + 1)")
-                            .font(.system(size: 15))
+                            .font(.system(size: 9))
                             .foregroundColor(index == currentPage ? .white : .white.opacity(0.3))
                     }
                     .onTapGesture {
@@ -152,9 +122,45 @@ struct ExecutionView: View {
                         }
                     }
                 }
-            } // End of custom index navigation row
-            
-        } // End of top-level VStack
+            }
+            .padding()
+        }
+    }
+    
+    func completeSet(exercise: ScheduledExercise, exerciseIndex: Int) {
+            withAnimation(.easeOut(duration: 0.3)) {
+            completedSets[exercise.id, default: 0] += 1
+        }
+        
+        let completed = completedSets[exercise.id] ?? 0
+        let isExhausted = completed >= exercise.workingSets
+        
+        if isExhausted {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                let nextIndex = todayExercises.indices
+                    .filter { idx in
+                        let ex = todayExercises[idx]
+                        let done = completedSets[ex.id] ?? 0
+                        return idx != exerciseIndex && done < ex.workingSets
+                    }
+                    .first(where: { $0 > exerciseIndex })
+                    ?? todayExercises.indices.first(where: { idx in
+                        let ex = todayExercises[idx]
+                        let done = completedSets[ex.id] ?? 0
+                        return done < ex.workingSets
+                    })
+                
+                if let next = nextIndex {
+                    withAnimation {
+                        currentPage = next
+                    }
+                } else {
+                    // Workout complete
+                    isWorkoutActive = false
+                    selectedTab = 2
+                }
+            }
+        }
     }
 }
 #Preview {
