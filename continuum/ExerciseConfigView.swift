@@ -13,20 +13,6 @@ struct ExerciseConfigView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
-    
-    @State private var workingSets: Int
-    @State private var targetReps: Int
-    @State private var targetWeight: Int
-    @State private var notes: String
-    
-    init(exercise: ScheduledExercise) {
-        self.exercise = exercise
-        _workingSets = State(initialValue: exercise.workingSets)
-        _targetReps = State(initialValue: exercise.targetReps)
-        _targetWeight = State(initialValue: exercise.targetWeight)
-        _notes = State(initialValue: exercise.notes)
-    }
-    
     var body: some View {
         NavigationStack {
             Form {
@@ -82,14 +68,5 @@ struct ExerciseConfigView: View {
             .navigationTitle("Configure Exercise")
             .navigationBarTitleDisplayMode(.inline)
         }
-    }
-    
-    func saveChanges() {
-        exercise.workingSets = workingSets
-        exercise.targetReps = targetReps
-        exercise.targetWeight = targetWeight
-        exercise.notes = notes
-        try? modelContext.save()
-        dismiss()
     }
 }
