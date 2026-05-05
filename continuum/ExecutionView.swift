@@ -11,7 +11,7 @@ import SwiftData
 struct ExecutionView: View {
     @Binding var isWorkoutActive: Bool
     @Binding var selectedTab: Int
-    @Binding var workoutJustCompleted = Bool
+    @Binding var workoutJustCompleted: Bool
     
     @Query var plans: [Plan]
     
@@ -124,8 +124,8 @@ struct ExecutionView: View {
                     VStack(spacing: 4) {
                         Circle()
                             .fill(index == currentPage ? Color.white : Color.white.opacity(0.3))
-                            .frame(width: index == currentPage ? 14 : 10,
-                                   height: index == currentPage ? 14 : 10)
+                            .frame(width: index == currentPage ? 20 : 15,
+                                   height: index == currentPage ? 20 : 15)
                         Text("\(index + 1)")
                             .font(.system(size: 9))
                             .foregroundColor(index == currentPage ? .white : .white.opacity(0.3))

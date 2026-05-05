@@ -39,7 +39,9 @@ struct ContentView: View {
             ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab, workoutJustCompleted: $workoutJustCompleted)
         }
         .sheet(isPresented: $workoutJustCompleted) {
-                WorkoutSummaryView()
+            WorkoutSummaryView()
+                .presentationDragIndicator(.visible)
+        }
         .onAppear {
             DataSeeder.seedIfNeeded(context: modelContext, force: false)
         }

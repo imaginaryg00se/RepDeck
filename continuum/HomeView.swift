@@ -23,6 +23,12 @@ struct HomeView: View {
             todayPlanDay?.scheduledExercises.sorted { $0.orderIndex < $1.orderIndex } ?? []
         }
     
+    var formattedDate: String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "EEEE, MMMM d"
+            return formatter.string(from: Date())
+    }
+    
     var body: some View {
         VStack(spacing: 24) {
             // Header
@@ -69,11 +75,6 @@ struct HomeView: View {
             }
         }
     }
-    var formattedDate: String {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "EEEE, MMMM d"
-            return formatter.string(from: Date())
-        }
 }
 
 #Preview {
