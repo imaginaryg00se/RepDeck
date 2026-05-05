@@ -45,8 +45,9 @@ struct HomeView: View {
             // Exercise preview
             if todayExercises.isEmpty {
                 Spacer()
-                Text("No exercises scheduled today.")
-                    .foregroundColor(.gray)
+                Text("No exercises scheduled today")
+                    .font(.caption)
+                    .foregroundColor(.gray.opacity(0.7))
                 Spacer()
             } else {
                 ScrollView {

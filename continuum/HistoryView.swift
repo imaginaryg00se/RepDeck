@@ -16,6 +16,8 @@ struct HistoryView: View {
     var body: some View {
         if workoutLogs.isEmpty {
             Text("No workouts yet")
+                .font(.caption)
+                .foregroundColor(.gray.opacity(0.7))
         } else {
             // List out WorkoutLog objects
             List(workoutLogs) { log in
