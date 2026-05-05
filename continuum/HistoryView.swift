@@ -12,6 +12,8 @@ struct HistoryView: View {
     @Query(sort: \WorkoutLog.date, order: .reverse) var workoutLogs: [WorkoutLog]
     
     @State private var selectedLog: WorkoutLog? = nil
+    
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         if workoutLogs.isEmpty {
@@ -20,19 +22,23 @@ struct HistoryView: View {
                 .foregroundColor(.gray.opacity(0.7))
         } else {
             // List out WorkoutLog objects
-            List(workoutLogs) { log in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(log.date, style: .date)
-                        .font(.headline)
-                    Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-                .background(
-                    Button { selectedLog = log } label: {
-                        Color.clear
+            List {
+                ForEach(workoutLogs) { log in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(log.date, style: .date)
+                            .font(.headline)
+
+                        Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                )
+                    .background(
+                        Button { selectedLog = log } label: {
+                            Color.clear
+                        }
+                    )
+                }
+                .onDelete(perform: deleteWorkoutLog)
             }
             .sheet(item: $selectedLog) { log in
                 WorkoutSummaryView(workoutLog: log)
@@ -40,5 +46,12 @@ struct HistoryView: View {
                     .presentationDragIndicator(.visible)
             }
         }
+    }
+    func deleteWorkoutLog(at indexSet: IndexSet) {
+        for index in indexSet {
+            let log = workoutLogs[index]
+            modelContext.delete(log)
+        }
+        try? modelContext.save()
     }
 }
