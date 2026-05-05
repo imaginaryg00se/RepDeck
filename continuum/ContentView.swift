@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     @State private var isWorkoutActive = false
@@ -13,6 +14,8 @@ struct ContentView: View {
     @State private var workoutJustCompleted = false
     
     @Environment(\.modelContext) private var modelContext
+    
+    @Query(sort: \WorkoutLog.date, order: .reverse) var workoutLogs: [WorkoutLog]
     
     var body: some View {
         TabView (selection: $selectedTab) {
@@ -39,9 +42,11 @@ struct ContentView: View {
             ExecutionView(isWorkoutActive: $isWorkoutActive, selectedTab: $selectedTab, workoutJustCompleted: $workoutJustCompleted)
         }
         .sheet(isPresented: $workoutJustCompleted) {
-            WorkoutSummaryView()
-                .presentationDragIndicator(.visible)
+            if let mostRecentLog = workoutLogs.first {
+                WorkoutSummaryView(workoutLog: mostRecentLog)
+            }
         }
+        .presentationDragIndicator(.visible)
         .onAppear {
             DataSeeder.seedIfNeeded(context: modelContext, force: false)
         }
