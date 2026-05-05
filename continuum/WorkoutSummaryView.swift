@@ -15,7 +15,7 @@ struct WorkoutSummaryView: View {
         // Unwrap the optional using if let
         VStack(spacing: 4) {
             // Header
-            Text("Workout Complete")
+            Text("Workout Summary")
                 .font(.largeTitle)
                 .fontWeight(.bold)
             Text(workoutLog.date, style: .date)

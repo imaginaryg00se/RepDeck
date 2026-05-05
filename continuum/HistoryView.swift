@@ -6,13 +6,37 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HistoryView: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
-    }
-}
+    @Query(sort: \WorkoutLog.date, order: .reverse) var workoutLogs: [WorkoutLog]
+    
+    @State private var selectedLog: WorkoutLog? = nil
 
-#Preview {
-    HistoryView()
+    var body: some View {
+        if workoutLogs.isEmpty {
+            Text("No workouts yet")
+        } else {
+            // List out WorkoutLog objects
+            List(workoutLogs) { log in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(log.date, style: .date)
+                        .font(.headline)
+                    Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .background(
+                    Button { selectedLog = log } label: {
+                        Color.clear
+                    }
+                )
+            }
+            .sheet(item: $selectedLog) { log in
+                WorkoutSummaryView(workoutLog: log)
+                    .presentationDetents([.fraction(0.85), .large])
+                    .presentationDragIndicator(.visible)
+            }
+        }
+    }
 }
