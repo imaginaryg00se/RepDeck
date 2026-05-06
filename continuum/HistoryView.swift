@@ -47,27 +47,25 @@ struct HistoryView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Filter bar
+            // Filter bar
             HStack(spacing: 8) {
                 ForEach(HistoryFilter.allCases) { option in
-                    Button {
+                    Button(action: {
                         filter = option
-                    } label: {
+                    }) {
                         Text(option.rawValue)
-                            .font(.subheadline)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
-                            .background(filter == option ? Color.accentColor : Color.clear)
-                            .foregroundColor(filter == option ? .white : .primary)
-                            .overlay(
-                                Capsule().stroke(Color.accentColor, lineWidth: 1)
-                            )
-                            .clipShape(Capsule())
+                            .font(.system(size: 13, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .background(filter == option ? Color.primary : Color.clear)
+                            .foregroundColor(filter == option ? Color(UIColor.systemBackground) : .gray)
+                            .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.vertical, 8)
 
             if filteredLogs.isEmpty {
                 Spacer()
