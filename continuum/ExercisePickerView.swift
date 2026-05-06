@@ -30,11 +30,13 @@ struct ExercisePickerView: View {
             List(filteredTemplates) { template in
                 Button(action: {addExercise(template: template) }) {
                     Text(template.displayName)
+                        .foregroundStyle(.white)
                 }
             }
             .searchable(text: $searchText, prompt: "Search exercises")
             .navigationTitle("Add Exercise")
             .navigationBarTitleDisplayMode(.inline)
+            .contentMargins(.top, 0, for: .scrollContent)
         }
     }
     
