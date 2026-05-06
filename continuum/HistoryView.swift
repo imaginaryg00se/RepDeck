@@ -12,44 +12,100 @@ struct HistoryView: View {
     @Query(sort: \WorkoutLog.date, order: .reverse) var workoutLogs: [WorkoutLog]
     
     @State private var selectedLog: WorkoutLog? = nil
+    @State private var filter: HistoryFilter = .thisWeek
     
     @Environment(\.modelContext) private var modelContext
+    
+    enum HistoryFilter: String, CaseIterable, Identifiable {
+        case thisWeek = "This Week"
+        case lastWeek = "Last Week"
+        case all = "All"
+        var id: String { rawValue }
+    }
+    
+    private var filteredLogs: [WorkoutLog] {
+        let calendar = Calendar.current
+        let now = Date()
 
-    var body: some View {
-        if workoutLogs.isEmpty {
-            Text("No workouts yet")
-                .font(.caption)
-                .foregroundColor(.gray.opacity(0.7))
-        } else {
-            // List out WorkoutLog objects
-            List {
-                ForEach(workoutLogs) { log in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(log.date, style: .date)
-                            .font(.headline)
+        switch filter {
+        case .all:
+            return workoutLogs
 
-                        Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .background(
-                        Button { selectedLog = log } label: {
-                            Color.clear
-                        }
-                    )
-                }
-                .onDelete(perform: deleteWorkoutLog)
-            }
-            .sheet(item: $selectedLog) { log in
-                WorkoutSummaryView(workoutLog: log)
-                    .presentationDetents([.fraction(0.85), .large])
-                    .presentationDragIndicator(.visible)
-            }
+        case .thisWeek:
+            guard let weekStart = calendar.dateInterval(of: .weekOfYear, for: now)?.start
+            else { return workoutLogs }
+            return workoutLogs.filter { $0.date >= weekStart }
+
+        case .lastWeek:
+            guard let thisWeekStart = calendar.dateInterval(of: .weekOfYear, for: now)?.start,
+                  let lastWeekStart = calendar.date(byAdding: .weekOfYear, value: -1, to: thisWeekStart)
+            else { return workoutLogs }
+            return workoutLogs.filter { $0.date >= lastWeekStart && $0.date < thisWeekStart }
         }
     }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Filter bar
+            HStack(spacing: 8) {
+                ForEach(HistoryFilter.allCases) { option in
+                    Button {
+                        filter = option
+                    } label: {
+                        Text(option.rawValue)
+                            .font(.subheadline)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(filter == option ? Color.accentColor : Color.clear)
+                            .foregroundColor(filter == option ? .white : .primary)
+                            .overlay(
+                                Capsule().stroke(Color.accentColor, lineWidth: 1)
+                            )
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            if filteredLogs.isEmpty {
+                Spacer()
+                Text(workoutLogs.isEmpty ? "No workouts yet" : "No workouts in this range")
+                    .font(.caption)
+                    .foregroundColor(.gray.opacity(0.7))
+                Spacer()
+            } else {
+                List {
+                    ForEach(filteredLogs) { log in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(log.date, style: .date)
+                                .font(.headline)
+
+                            Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .background(
+                            Button { selectedLog = log } label: {
+                                Color.clear
+                            }
+                        )
+                    }
+                    .onDelete(perform: deleteWorkoutLog)
+                }
+            }
+        }
+        .sheet(item: $selectedLog) { log in
+            WorkoutSummaryView(workoutLog: log)
+                .presentationDetents([.fraction(0.85), .large])
+                .presentationDragIndicator(.visible)
+        }
+    }
+    
     func deleteWorkoutLog(at indexSet: IndexSet) {
         for index in indexSet {
-            let log = workoutLogs[index]
+            let log = filteredLogs[index]   // not workoutLogs
             modelContext.delete(log)
         }
         try? modelContext.save()
