@@ -53,15 +53,19 @@ struct HomeView: View {
                 ScrollView {
                     VStack(spacing: 12) {
                         ForEach(todayExercises) { exercise in
+                            // HStack here gives left-align
                             HStack {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(exercise.exerciseTemplate?.displayName ?? "Unknown")
                                         .font(.headline)
-                                    Text("\(exercise.workingSets) sets × \(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
-                                        .font(.caption)
+                                    Text("\(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
                                         .foregroundColor(.secondary)
                                 }
                                 Spacer()
+                                Text("\(exercise.workingSets)×")
+                                    .font(.system(size: 32, weight: .bold))
                             }
                             .padding()
                             .background(Color.secondary.opacity(0.1))

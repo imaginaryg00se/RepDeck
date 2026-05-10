@@ -47,7 +47,6 @@ struct HistoryView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Filter bar
-            // Filter bar
             HStack(spacing: 8) {
                 ForEach(HistoryFilter.allCases) { option in
                     Button(action: {
