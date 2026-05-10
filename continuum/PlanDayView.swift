@@ -39,6 +39,9 @@ struct PlanDayView: View {
                     .onDelete {indexSet in
                         deleteExercises(at : indexSet)
                     }
+                    .onMove { source, destination in
+                        moveExercises(from: source, to: destination)
+                    }
                 }
             }
         }
@@ -64,6 +67,22 @@ struct PlanDayView: View {
             // Remove from database
             modelContext.delete(exercise)
         }
+        try? modelContext.save()
+    }
+    
+    func moveExercises(from source: IndexSet, to destination: Int) {
+        // We get the pass-over tick for free
+        // This line gives Haptic on drop
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        
+        // Reorder in a mutable array, then rewrite orderIndex on all
+        var reordered = sortedExercises
+        reordered.move(fromOffsets: source, toOffset: destination)
+        
+        for (index, exercise) in reordered.enumerated() {
+            exercise.orderIndex = index
+        }
+        
         try? modelContext.save()
     }
 }

@@ -12,24 +12,31 @@ struct ExerciseRow: View {
     @State private var showingConfig = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            // Line 1 — exercise name, most prominent
-            Text(exercise.exerciseTemplate?.displayName ?? "Unknown Exercise")
-                .font(.headline)
-                .foregroundColor(.primary)
-            
-            // Line 2 — sets, reps, weight
-            Text("\(exercise.workingSets) sets × \(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-            
-            // Line 3 — notes, only shown if non-empty
-            if !exercise.notes.isEmpty {
-                Text(exercise.notes)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .italic()
+        HStack{
+            VStack(alignment: .leading, spacing: 4) {
+                // Line 1 — exercise name, most prominent
+                Text(exercise.exerciseTemplate?.displayName ?? "Unknown Exercise")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                // Line 2 — sets, reps, weight
+                Text("\(exercise.workingSets) sets × \(exercise.targetReps) reps @ \(exercise.targetWeight) lbs")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                // Line 3 — notes, only shown if non-empty
+                if !exercise.notes.isEmpty {
+                    Text(exercise.notes)
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .italic()
+                }
             }
+            
+            Spacer()
+            
+            Image(systemName: "line.3.horizontal")
+                .foregroundColor(.gray.opacity(0.4))
         }
         .padding(.vertical, 4)
         .background(
