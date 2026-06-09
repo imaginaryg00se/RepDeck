@@ -2,7 +2,7 @@
 
 **A workout tracker built around a deck of cards — one set per card, swipe to advance.**
 
-RepDeck turns a training session into a focused, tactile flow: instead of scrolling a spreadsheet of sets, you move through your workout one card at a time. It's a native iOS app I built to power [Continuum](https://your-continuum-url.com), my 1:1 fitness coaching practice — a way to hand clients a structured program that feels less like data entry and more like just *training*.
+RepDeck turns a training session into a focused, tactile flow: instead of scrolling a spreadsheet of sets, you move through your workout one card at a time. It's a native iOS app I built to power [Continuum](https://sites.google.com/view/continuum-fitness/home), my 1:1 fitness coaching practice — a way to hand clients a structured program that feels less like data entry and more like just *training*.
 
 <p align="center">
   <img src="screenshots/HOME.PNG" width="30%" alt="Today's workout home screen" />
