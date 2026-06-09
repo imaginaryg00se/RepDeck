@@ -20,7 +20,7 @@ It's also how I think about coaching generally — reduce the cognitive load on 
 
 ## The signature: the deck
 
-During a session, your workout is a stack of cards. Each card is one set. You complete it, swipe, and the next set is in front of you — with a progress bar up top (`1/15`) and per-exercise segments filling in as you go. Haptics and animations (not captured in stills) reinforce each completed set.
+During a session, your workout is a stack of cards. Each card is one set. You complete it, swipe, and the next set is in front of you — with a progress bar up top and per-exercise segments filling in as you go. Haptics and animations (not captured in stills) reinforce each completed set.
 
 <p align="center">
   <img src="screenshots/EXECUTION.PNG" width="30%" alt="Set in progress" />
