@@ -55,14 +55,17 @@ During a session, your workout is a stack of cards. Each card is one set. You co
 - Post-workout summary and week-filterable history
 
 ## Tech
-
-> _Confirm / adjust these to match your actual stack before publishing._
-
+ 
 - **Language:** Swift
 - **UI:** SwiftUI
-- **Persistence:** [SwiftData / Core Data / your choice]
-- **Minimum iOS:** [e.g. iOS 17]
-- **Architecture:** [e.g. MVVM]
+- **Persistence:** SwiftData (local-only; `UUID`-keyed models preserve a CloudKit migration path)
+- **Dependencies:** None — no third-party libraries
+- **Architecture:** MV (Model-View) — SwiftUI views observe SwiftData models directly via `@Query`, with no separate ViewModel layer
+## A few design decisions
+ 
+- **Planned vs. actuals are separate models.** Scheduled targets are never mutated during a workout; completed sessions are logged independently. This keeps program integrity intact and makes intent-vs-actuals comparison possible later.
+- **MV over MVVM, on purpose.** With SwiftData's `@Model` and SwiftUI's `@Query`, a ViewModel layer adds ceremony without payoff — views observe models directly, logic lives in the models and computed properties.
+- **Built the gestures from scratch.** The slide-to-begin control and the swipe-to-complete card stack are custom — no gesture libraries.
 
 ---
 
