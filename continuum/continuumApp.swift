@@ -23,8 +23,6 @@ struct continuumApp: App {
             options.tracesSampleRate = 0.0   // performance tracing OFF — crashes only
             // profiling / session replay intentionally omitted for the first beta
         }
-        // Temporary: confirms the pipeline end-to-end. Remove once it shows in the dashboard.
-        SentrySDK.capture(message: "Continuum Sentry test")
     }
     var body: some Scene {
         WindowGroup {
