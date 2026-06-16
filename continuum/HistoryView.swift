@@ -83,18 +83,22 @@ struct HistoryView: View {
             } else {
                 List {
                     ForEach(filteredLogs) { log in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(log.date, style: .date)
-                                .font(.headline)
+                        HStack(spacing: 16) {
+                            Text(log.date.formatted(.dateTime.weekday(.abbreviated)))
+                                .font(.largeTitle.bold())
+                                .textCase(.uppercase)
+                                .frame(width: 88, alignment: .leading)
 
-                            Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(log.date.formatted(.dateTime.month(.wide).day().year()))
+                                    .font(.headline)
+                                Text("\(log.exerciseLogs.reduce(0) { $0 + $1.setsCompleted })/\(log.exerciseLogs.reduce(0) { $0 + $1.targetSets }) sets")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
                         }
                         .background(
-                            Button { selectedLog = log } label: {
-                                Color.clear
-                            }
+                            Button { selectedLog = log } label: { Color.clear }
                         )
                     }
                     .onDelete(perform: deleteWorkoutLog)
