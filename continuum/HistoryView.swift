@@ -9,13 +9,19 @@ import SwiftUI
 import SwiftData
 
 struct HistoryView: View {
+    // Pull all logs from SwiftData, newest first
     @Query(sort: \WorkoutLog.date, order: .reverse) var workoutLogs: [WorkoutLog]
     
+    // Which WorkoutSummary to dislay
     @State private var selectedLog: WorkoutLog? = nil
+    
+    // The time range of entries to display
     @State private var filter: HistoryFilter = .thisWeek
     
+    // Enables writing to SwiftData
     @Environment(\.modelContext) private var modelContext
     
+    // Filter options
     enum HistoryFilter: String, CaseIterable, Identifiable {
         case thisWeek = "This Week"
         case lastWeek = "Last Week"
@@ -23,6 +29,7 @@ struct HistoryView: View {
         var id: String { rawValue }
     }
     
+    // A computer property that narrows workoutLogs by date
     private var filteredLogs: [WorkoutLog] {
         let calendar = Calendar.current
         let now = Date()
@@ -50,6 +57,7 @@ struct HistoryView: View {
             HStack(spacing: 8) {
                 ForEach(HistoryFilter.allCases) { option in
                     Button(action: {
+                        // Since filter is @State, this triggers a re-run of 'body'
                         filter = option
                     }) {
                         Text(option.rawValue)
