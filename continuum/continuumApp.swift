@@ -15,7 +15,13 @@ struct continuumApp: App {
     init() {
         SentrySDK.start { options in
             options.dsn = "https://f65bce2d71b2aa058b20657994ca9eec@o4511554286714880.ingest.us.sentry.io/4511554330951680"
+            
+            #if DEBUG
             options.environment = "development"
+            #else
+            options.environment = "beta"
+            #endif
+            
             #if DEBUG
             options.debug = true
             #endif
