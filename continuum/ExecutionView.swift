@@ -19,6 +19,15 @@ struct ExecutionView: View {
     @State private var currentPage = 0
     @State private var cardWidth: CGFloat = 300
     
+    // Abandon-gesture state
+    @State private var abandonOffset: CGFloat = 0      // thumb position, 0…maxOffset
+    @State private var abandonArmed = false            // overlay visible?
+    @State private var abandonCommitted = false        // crossed commit threshold? (haptic latch)
+
+    // Abandon-gesture constants
+    private let thumbWidth: CGFloat = 56
+    private let commitFraction: CGFloat = 0.88         // slide this far → commit
+    
     @Environment(\.modelContext) private var modelContext
     
     var todayExercises: [ScheduledExercise] {
@@ -37,22 +46,65 @@ struct ExecutionView: View {
         completedSets.values.reduce(0, +)
     }
     
+    private var progressHeader: some View {
+        VStack(spacing: 4) {
+            Text("Workout Progress")
+                .font(.headline)
+            Text("\(totalCompletedSets)/\(totalSets)")
+                .font(.subheadline)
+                .fontWeight(.semibold)
+                .foregroundColor(.gray)
+            ProgressView(value: Double(totalCompletedSets), total: Double(totalSets))
+                .tint(.blue)
+                .padding(.horizontal)
+                .scaleEffect(x: 1, y: 2, anchor: .center)
+        }
+    }
+    
+    private var headerZone: some View {
+        GeometryReader { geo in
+            let trackWidth = geo.size.width
+            let maxOffset = trackWidth - thumbWidth
+
+            ZStack {
+                progressHeader
+                    .opacity(abandonArmed ? 0 : 1)
+
+                if abandonArmed {
+                    abandonTrack(maxOffset: maxOffset)
+                        .transition(.opacity)
+                }
+            }
+            .contentShape(Rectangle())              // whole zone hit-testable, incl. empty space
+            .gesture(
+                DragGesture(minimumDistance: 15)
+                    .onChanged { v in
+                        if !abandonArmed {
+                            withAnimation(.easeOut(duration: 0.15)) { abandonArmed = true }
+                        }
+                        abandonOffset = min(max(0, v.translation.width), maxOffset)
+                    }
+                    .onEnded { _ in
+                        if abandonOffset >= maxOffset * commitFraction {
+                            endWorkout()
+                        } else {
+                            withAnimation(.spring()) {
+                                abandonOffset = 0
+                                abandonArmed = false
+                            }
+                        }
+                    }
+            )
+        }
+        .frame(height: 60)                          // reserve the header's vertical space
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
-            // Workout-level progress bar
-            VStack(spacing: 4) {
-                Text("Workout Progress")
-                    .font(.headline)
-                Text("\(totalCompletedSets)/\(totalSets)")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.gray)
-                ProgressView(value: Double(totalCompletedSets), total: Double(totalSets))
-                    .tint(.blue)
-                    .padding(.horizontal)
-                    .scaleEffect(x: 1, y: 2, anchor: .center)
-            }
-            .padding(.top)
+            
+            headerZone
+                .padding(.horizontal)
+                .padding(.top)
             
             // Carousel
             TabView(selection: $currentPage) {
@@ -203,5 +255,47 @@ struct ExecutionView: View {
         }
         
         try? modelContext.save()
+    }
+    
+    @ViewBuilder
+    private func abandonTrack(maxOffset: CGFloat) -> some View {
+        // 0…1 progress along the track, for color + label fade
+        let progress = maxOffset > 0 ? abandonOffset / maxOffset : 0
+        let committed = progress >= commitFraction
+
+        ZStack(alignment: .leading) {
+            // Track background — ramps neutral → red as you slide
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.red.opacity(0.12 + 0.33 * progress))
+
+            // Filled trail behind the thumb
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.red.opacity(0.25 + 0.45 * progress))
+                .frame(width: abandonOffset + thumbWidth)
+
+            // Label — fades out as the thumb advances over it
+            Text(committed ? "Release to end" : "Slide to end workout")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(.white.opacity(committed ? 1 : 0.7 - 0.4 * progress))
+                .frame(maxWidth: .infinity)
+                .allowsHitTesting(false)
+
+            // Thumb
+            ZStack {
+                Circle().fill(.white)
+                Image(systemName: committed ? "checkmark" : "chevron.right")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.red)
+            }
+            .frame(width: thumbWidth, height: thumbWidth)
+            .offset(x: abandonOffset)
+            .shadow(radius: 2, y: 1)
+        }
+        .frame(height: thumbWidth)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+    
+    private func endWorkout() {
+        isWorkoutActive = false   // minimal stub — real version clears the buffer too
     }
 }
