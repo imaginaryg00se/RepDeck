@@ -84,8 +84,15 @@ struct ExecutionView: View {
                     .onChanged { v in
                         if !abandonArmed {
                             withAnimation(.easeOut(duration: 0.15)) { abandonArmed = true }
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         }
                         abandonOffset = min(max(0, v.translation.width), maxOffset)
+                        
+                        let isPastThreshold = abandonOffset >= maxOffset * commitFraction
+                        if isPastThreshold != abandonCommitted {
+                            abandonCommitted = isPastThreshold
+                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        }
                     }
                     .onEnded { _ in
                         if abandonOffset >= maxOffset * commitFraction {
@@ -306,6 +313,7 @@ struct ExecutionView: View {
     }
     
     private func endWorkout() {
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
         // 1. Clear the durable buffer FIRST — explicitly, not via the .onChange mirror.
         completedSetsData = Data()
 
