@@ -9,7 +9,9 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @State private var isWorkoutActive = false
+    // Persistent value across app relaunches
+    @AppStorage("isWorkoutActive") private var isWorkoutActive = false
+    
     @State private var selectedTab = 0
     @State private var workoutJustCompleted = false
     

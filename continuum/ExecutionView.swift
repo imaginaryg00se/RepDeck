@@ -16,7 +16,6 @@ struct ExecutionView: View {
     @Query var plans: [Plan]
     
     @State private var completedSets: [UUID: Int] = [:]
-    @State private var currentPage = 0
     @State private var cardWidth: CGFloat = 300
     
     // Abandon-gesture state
@@ -29,6 +28,10 @@ struct ExecutionView: View {
     private let commitFraction: CGFloat = 0.88         // slide this far → commit
     
     @Environment(\.modelContext) private var modelContext
+    
+    // Save state of execution engine
+    @AppStorage("completedSetsData") private var completedSetsData: Data = Data()
+    @AppStorage("currentPage") private var currentPage = 0
     
     var todayExercises: [ScheduledExercise] {
         let today = Calendar.current.component(.weekday, from: Date())
@@ -191,7 +194,17 @@ struct ExecutionView: View {
             }
             .padding()
         }
+        
+        // On the root view of ExecutionView's body
+        .onChange(of: completedSets) { _, _ in
+            persistCompletedSets()
+        }
+        .onAppear {
+            loadCompletedSets()
+        }
+        
     }
+    
     // Helper function handling set completion behavior
     func completeSet(exercise: ScheduledExercise, exerciseIndex: Int) {
             withAnimation(.easeOut(duration: 0.3)) {
@@ -223,10 +236,7 @@ struct ExecutionView: View {
                     }
                 } else {
                     // Workout complete
-                    saveWorkoutLog()
-                    isWorkoutActive = false
-                    selectedTab = 2
-                    workoutJustCompleted = true
+                    completeWorkout()
                 }
             }
         }
@@ -296,6 +306,41 @@ struct ExecutionView: View {
     }
     
     private func endWorkout() {
-        isWorkoutActive = false   // minimal stub — real version clears the buffer too
+        // 1. Clear the durable buffer FIRST — explicitly, not via the .onChange mirror.
+        completedSetsData = Data()
+
+        // 2. Reset in-memory execution state
+        completedSets = [:]
+        currentPage = 0
+
+        // 3. Reset gesture state so a re-entered workout starts clean
+        abandonOffset = 0
+        abandonArmed = false
+        abandonCommitted = false
+
+        // 4. Flip the flag last — this dismisses the fullScreenCover and tears down this view
+        isWorkoutActive = false
     }
+    
+    private func completeWorkout() {
+        saveWorkoutLog()            // Writes to history
+        workoutJustCompleted = true // Pulls up summary
+        selectedTab = 2             // Navigates to history tab
+        endWorkout()                // Reset
+    }
+
+    private func persistCompletedSets() {
+        let encodable = completedSets.reduce(into: [String: Int]()) { $0[$1.key.uuidString] = $1.value }
+        completedSetsData = (try? JSONEncoder().encode(encodable)) ?? Data()
+    }
+
+    private func loadCompletedSets() {
+        guard !completedSetsData.isEmpty,
+              let decoded = try? JSONDecoder().decode([String: Int].self, from: completedSetsData)
+        else { return }
+        completedSets = decoded.reduce(into: [UUID: Int]()) { dict, pair in
+            if let id = UUID(uuidString: pair.key) { dict[id] = pair.value }
+        }
+    }
+    
 }
